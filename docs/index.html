@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fast and Ultra Low-Complexity Network (Fast-ULCNet) – Demo</title>
+  <link rel="icon" href="assets/img/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <meta name="description" content="Listening examples for the Fast-ULCNet noise suppression model." />
+</head>
+<body>
+  <header class="wrap">
+    <h1>FAST AND ULTRA LOW COMPLEXITY NEWORK (FAST-ULCNET)</h1>
+    <p class="authors">
+      Nicolas Arrieta Larraza, Niels de Koeijer<br/>
+      Bang & Olufsen, Copenhagen, Denmark<br/>
+      <a class="muted" href="mailto:nial@bang-olufsen.dk">nial@bang-olufsen.dk</a>
+    </p>
+    <nav class="toc">
+      <a href="#abstract">Abstract</a>
+      <a href="#demo-description">Demo description</a>
+      <a href="#examples">Audio examples</a>
+      <a href="#conditions">Conditions of Use</a>
+      <a href="#" class="top">Top ↑</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section id="abstract">
+      <h2>Abstract</h2>
+      <p>
+        Single-channel speech enhancement algorithms are often
+        used in resource-constrained embedded devices, where low
+        latency and low-complexity designs gain more importance.
+        In recent years, researchers have proposed a wide variety
+        of novel solutions to this problem. In particular, a recent
+        deep learning model named ULCNet is among the state-of-
+        the-art approaches in this domain. This paper proposes an
+        adaptation of ULCNet, by replacing its GRU layers with
+        FastGRNNs, to reduce both computational latency and com-
+        plexity. Furthermore, this paper shows empirical evidence on
+        the performance decay of FastGRNNs in long audio signals
+        during inference due to internal state drifting, and proposes
+        a novel approach based on a trainable complementary filter
+        to solve it. The resulting model, Fast-ULCNet, performs on
+        par with the state-of-the-art original ULCNet architecture on
+        a speech enhancement task, while reducing its model size by
+        more than half and decreasing its latency by 34% on average.
+      </p>
+    </section>
+
+    <section id="demo-description">
+      <h2>Description of the demo</h2>
+      <p>
+        bla bla bla 
+      </p>
+    </section>
+
+    <section id="examples">
+      <h2>Audio examples</h2>
+
+      <!-- Sample item template -->
+      <article class="item">
+        <h3>Item 1</h3>
+        <details>
+          <summary>Show players</summary>
+          <div class="players">
+            <div class="player">
+              <span>Noisy</span>
+              <audio controls preload="none" src="assets/audio/item1_noisy.mp3"></audio>
+            </div>
+            <div class="player">
+              <span>ULCNet</span>
+              <audio controls preload="none" src="assets/audio/item1_ulcnetfreq.mp3"></audio>
+            </div>
+            <div class="player">
+              <span>Fast-ULCNet (ours)</span>
+              <audio controls preload="none" src="assets/audio/item1_ulcnetms.mp3"></audio>
+            </div>
+          </div>
+        </details>
+      </article>
+
+      <!-- Duplicate <article> blocks for Item 2..N and update filenames -->
+      <article class="item"><h3>Item 2</h3>
+        <details><summary>Show players</summary>
+          <div class="players">
+            <div class="player"><span>Noisy</span><audio controls preload="none" src="assets/audio/item2_noisy.mp3"></audio></div>
+            <div class="player"><span>ULCNet</span><audio controls preload="none" src="assets/audio/item2_ulcnetfreq.mp3"></audio></div>
+            <div class="player"><span>Fast-ULCNet</span><audio controls preload="none" src="assets/audio/item2_ulcnetms.mp3"></audio></div>
+          </div>
+        </details>
+      </article>
+    </section>
+
+    <section id="conditions">
+      <h2>Conditions of Use</h2>
+      <ol class="conditions">
+        <li>All the material used for this demo is freely available on the official DNS Challenge github repository</li>
+        <li>These samples are provided solely for testing and appreciating noise-reduction techniques.</li>
+        <li>No warranties are expressed or implied regarding accuracy or fitness for a particular purpose.</li>
+        <li>Do not redistribute or modify outside of evaluation without permission.</li>
+        <li>Include this notice when sharing links to this page.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <hr/>
+    <p class="muted">© <span id="y"></span> Bang & Olufsen</p>
+  </footer>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
