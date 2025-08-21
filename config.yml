@@ -1,0 +1,28 @@
+# Data parameters
+data_parameters:
+  fs: 16000
+  block_len: 512
+  block_shift: 128
+  hann_window: True
+  compression_factor: 0.3
+
+model_parameters:
+  CRM_type: 'E' # Type of Complex-Ratio Mask ['R', 'C' or 'E']
+  bidirectional_frnn_units: 64
+  sub_band_rnn_units: 128
+
+# Training parameters
+training_parameters:
+  batch_size: 32
+  max_epochs: 300
+  eps: 1.e-8
+
+  adaptive_lr:
+    lr: 1.e-3
+    min_lr: 10.e-10
+    factor: 0.5 
+    patience: 3
+    cooldown: 1
+
+  early_stopping:
+    patience: 5
