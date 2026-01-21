@@ -1,7 +1,9 @@
 # Fast-ULCNet
 
-Official repository of **Fast-ULCNet**.  
+Official repository of **Fast-ULCNet**.
+
 The paper is available [here](#).(TBD)
+
 A demo with online examples is available [here](https://narrietal.github.io/Fast-ULCNet/).
 
 This repository contains the code to build the model as described in the paper.  
