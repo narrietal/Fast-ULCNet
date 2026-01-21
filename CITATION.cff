@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Arrieta Larraza"
+  given-names: "Nicolás"
+  orcid: "https://orcid.org/0009-0008-1060-5712"
+- family-names: "de Koeijer"
+  given-names: "Niels"
+  orcid: "https://orcid.org/0009-0001-6931-8952"
+title: "Fast-ULCNet"
+version: 1.0.0
+date-released: 2025-08-20
+url: "https://github.com/narrietal/Fast-ULCNet"
