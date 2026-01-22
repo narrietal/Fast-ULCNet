@@ -2,10 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-import numpy as np
 import libsegmenter
 from ComfiFastGRNNTorch import ComfiFastGRNNTorch
-
 
 class ComplexRatioMask(nn.Module):
     """
@@ -24,11 +22,16 @@ class ComplexRatioMask(nn.Module):
         return torch.complex(est_real, est_imag)
 
 class STFTLayer(nn.Module):
+    """
+    Custom Pytorch Layer for computing STFT.
+    """
     def __init__(self, block_len, block_shift, window=None):
         super().__init__()
         self.block_len = block_len
         self.block_shift = block_shift
         self.window = window
+        
+        print(type(self.window))
 
     def forward(self, x):
         # x: [Batch, Samples]
@@ -45,6 +48,10 @@ class STFTLayer(nn.Module):
         return stft.transpose(1, 2)
 
 class ChannelWiseFeatureReorientation(nn.Module):
+    """
+    Custom TensorFlow Layer for computing Channel-wise Feature Reorientation 
+    technique described in https://arxiv.org/html/2312.08132v1.
+    """
     def __init__(self, input_freq_dim=257):
         super().__init__()
         self.input_freq_dim = int(input_freq_dim)
@@ -69,13 +76,14 @@ class ChannelWiseFeatureReorientation(nn.Module):
             else:
                 subband = x[:, :, start:end]
             subbands.append(subband)
-            
-        print("x.shape vs output", x.shape, torch.stack(subbands, dim=2).shape)
-        
+                
         # Stack into [B, T, n_bands, window_size]
         return torch.stack(subbands, dim=2)
 
 class SeparableConv2d(nn.Module):
+    """
+    Custom Depthwise separable 2D convolution class
+    """
     def __init__(self, in_channels, out_channels):
         super().__init__()
         self.depthwise = nn.Conv2d(in_channels, in_channels, kernel_size=(1, 3), padding=(0, 1), groups=in_channels, bias=False)
@@ -128,18 +136,26 @@ class ConvBlock(nn.Module):
         return x
 
 class FastULCNetTorch(nn.Module):
+    """
+    Fast-ULCNet network class.
+    """
     def __init__(self, config):
         super().__init__()
-        # Data Params
+        # data Params
         dp = config['data_parameters']
         self.block_len = dp['block_len']
         self.block_shift = dp['block_shift']
         self.compression_factor = dp['compression_factor']
         freq_dim = int(self.block_len // 2 + 1)
+        
+        # model params
         mp = config['model_parameters']
-
+        self.bidirectional_frnn_units = mp['bidirectional_frnn_units']
+        self.sub_band_rnn_units = mp['sub_band_rnn_units']
+        
         # Layers
-        self.stft_layer = STFTLayer(self.block_len, self.block_shift)
+        window = torch.from_numpy(libsegmenter.WindowSelector("hann75", "wola", self.block_len).analysis_window) if dp["hann_window"] else None
+        self.stft_layer = STFTLayer(self.block_len, self.block_shift, window)
         self.reorientation = ChannelWiseFeatureReorientation(input_freq_dim=freq_dim)
         
         # Conv Block
@@ -148,40 +164,29 @@ class FastULCNetTorch(nn.Module):
         # RNN units        
         self.freq_rnn  = ComfiFastGRNNTorch(
                             input_size=128,
-                            hidden_size=mp['bidirectional_frnn_units'],
+                            hidden_size=self.bidirectional_frnn_units,
                             bidirectional=True,
                             batch_first=True
                         )
-        
-        self.pointwise_conv = nn.Conv2d(2 * mp['bidirectional_frnn_units'], 64, kernel_size=(1,1), bias=False)
-        
-        # Sub-band RNNs
-        # Pointwise output is 64 filters. Freq dim reduced by MaxPools.
-        # Initial freq is n_bands. Maxpool 1x2 applied 3 times -> n_bands // 8
-        reduced_freq = self.reorientation.n_bands // 8
-        self.rnn_input_dim = (reduced_freq * 64) // 2
-        
-        #self.sub_band_rnn1 = nn.GRU(self.rnn_input_dim, mp['sub_band_rnn_units'], 
-        #                            num_layers=2, batch_first=True)
-        #self.sub_band_rnn2 = nn.GRU(self.rnn_input_dim, mp['sub_band_rnn_units'], 
-        #                            num_layers=2, batch_first=True)
-        
+        # Point-wise conv
+        self.pointwise_conv = nn.Conv2d(2 * self.bidirectional_frnn_units, 64, kernel_size=(1,1), bias=False)
+          
         self.sub_band_rnn1  = ComfiFastGRNNTorch(
                     input_size=192,
-                    hidden_size=mp['sub_band_rnn_units'],
+                    hidden_size=self.sub_band_rnn_units,
                     num_layers=2,
                     batch_first=True
                 )
         
         self.sub_band_rnn2  = ComfiFastGRNNTorch(
                     input_size=192,
-                    hidden_size=mp['sub_band_rnn_units'],
+                    hidden_size=self.sub_band_rnn_units,
                     num_layers=2,
                     batch_first=True
                 )
         
         # Stage 1 Outputs
-        self.fc1 = nn.Linear(2 * mp['sub_band_rnn_units'], freq_dim)
+        self.fc1 = nn.Linear(2 * self.sub_band_rnn_units, freq_dim)
         self.fc2 = nn.Linear(freq_dim, freq_dim)
         
         # Stage 2 CNN
@@ -202,6 +207,19 @@ class FastULCNetTorch(nn.Module):
         mag = torch.sqrt(comp_real**2 + comp_imag**2)
         phase = torch.atan2(comp_imag, comp_real)
         return mag, phase, comp_real, comp_imag
+    
+    def intermediate_feature_computation(self, intermediate_mask, input_phase):
+        inter_r = intermediate_mask * torch.cos(input_phase)
+        inter_i = intermediate_mask * torch.sin(input_phase)
+        inter_feat = torch.stack([inter_r, inter_i], dim=1) # [B, 2, T, F]
+        return inter_feat
+    
+    def power_law_decompression(self, x):
+        final_real, final_imag = x.real, x.imag
+        inv_c = 1.0 / self.compression_factor
+        dec_real = torch.sign(final_real) * torch.pow(torch.abs(final_real), inv_c)
+        dec_imag = torch.sign(final_imag) * torch.pow(torch.abs(final_imag), inv_c)
+        return torch.complex(dec_real, dec_imag)
 
     def forward(self, x):
         # 1. STFT and Preprocessing
@@ -212,57 +230,42 @@ class FastULCNetTorch(nn.Module):
         features = self.reorientation(mag)
         # To [B, C, T, F] for PyTorch Conv2d
         features = features.permute(0, 2, 1, 3)
-        
-        print("Features after reorient:", features.shape)
-        
+                
         # 3. Conv Block with MaxPools
         x = self.conv_block(features)
-        
-        print("Features conv block:", x.shape)
-        
+                
         # 4. Frequency RNN
         # x shape: [B, 128, T, F_red] -> RNN expects [B*T, F_red, 128]
         B, C, T, F_red = x.shape
         x_rnn = x.permute(0, 2, 3, 1).reshape(B * T, F_red, C)
         frnn_out, _ = self.freq_rnn(x_rnn)
-        print("Output frnn:", frnn_out.shape)
         frnn_out = frnn_out.view(B, T, F_red, -1).permute(0, 3, 1, 2)
-        print("Output frnn PERMUTED:", frnn_out.shape)
         
         # 5. Temporal Sub-band RNNs
         x = F.relu(self.pointwise_conv(frnn_out)) # [B, 64, T, F_red]
-        print("Output pointwise_conv:", x.shape)
         x = x.permute(0, 2, 3, 1).reshape(B, T, -1) # Flatten F and C
         
-        print("Before subband:", x.shape)
         sub1, sub2 = torch.chunk(x, 2, dim=-1)
-        print("Subband1 subband:", sub1.shape)
         r1, _ = self.sub_band_rnn1(sub1)
         r2, _ = self.sub_band_rnn2(sub2)
         concatenated = torch.cat([r1, r2], dim=-1)
-        
-        print("Output concatenated:", concatenated.shape)
-        
+                
         # 6. Mask Computation
         mask = F.relu(self.fc1(concatenated))
         mask = F.relu(self.fc2(mask))
         
         # 7. Intermediate Features for Stage 2
-        inter_r = mask * torch.cos(phase)
-        inter_i = mask * torch.sin(phase)
-        inter_feat = torch.stack([inter_r, inter_i], dim=1) # [B, 2, T, F]
+        inter_feat = self.intermediate_feature_computation(mask, phase)
         
-        # 8. CRM and Decompression
+        # 8. CNN block for final mask
         cnn_out = self.cnn_block(inter_feat)
+        # Use a pointwise convolution to have the right shape
         c_mask = F.relu(self.complex_mask_conv(cnn_out))
+        
+        # 9. Reshape mask, CRM and decompression
         m_real, m_imag = c_mask[:, 0, :, :], c_mask[:, 1, :, :]
-        
-        est_speech_comp = self.crm_layer(real, imag, m_real, m_imag)
-        
+        est_speech_comp = self.crm_layer(real, imag, m_real, m_imag)  
         # Decompress
-        final_real, final_imag = est_speech_comp.real, est_speech_comp.imag
-        inv_c = 1.0 / self.compression_factor
-        dec_real = torch.sign(final_real) * torch.pow(torch.abs(final_real), inv_c)
-        dec_imag = torch.sign(final_imag) * torch.pow(torch.abs(final_imag), inv_c)
+        estimated_speech = self.power_law_decompression(est_speech_comp)
         
-        return torch.complex(dec_real, dec_imag)
+        return estimated_speech
