@@ -2,7 +2,7 @@
 
 Official repository of **Fast-ULCNet**.
 
-The paper is available [here](#).(TBD)
+The paper is available [here](https://arxiv.org/abs/2601.14925).
 
 A demo with online examples is available [here](https://narrietal.github.io/Fast-ULCNet/).
 
@@ -26,6 +26,11 @@ cd network
 python FastULCNet.py
 ```
 
+## Work in progress
+- Fast-ULCNet Pytorch implementation
+- Python package of Comfi-FastGRNN for both Tensorflow and Pytorch
+
 ## Citation
-If you use this code in your research, please cite the paper:
-TBD
+If you use Fast-ULCNet to inspire your research, please cite the paper: (TBD)
+
+
