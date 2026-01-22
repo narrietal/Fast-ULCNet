@@ -21,9 +21,18 @@ pip install -r requirements.txt
 
 ## Build model
 
+### Tensorflow
 ```bash
-cd network
-python FastULCNet.py
+python network/tensorflow_version/FastULCNet.py
+```
+### Pytorch
+```bash
+python network/pytorch_version/FastULCNetTorch.py
+```
+### Unit test
+A simple unit test code is provided to compare the Comfi-FastGRNN implementations between Tensorflow and Pytorch.
+```bash
+python unit_tests/unit_test_tensorflow_torch.py
 ```
 
 ## Work in progress

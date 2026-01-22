@@ -3,6 +3,7 @@ from tensorflow.keras.layers import AbstractRNNCell
 from tensorflow.keras import backend
 from tensorflow.keras.initializers import RandomNormal, Constant, Ones
 from tensorflow.keras.constraints import MinMaxNorm
+from tensorflow.keras.layers import RNN
 
 
 def gen_non_linearity(A, non_linearity):
@@ -32,13 +33,16 @@ def gen_non_linearity(A, non_linearity):
             raise ValueError("non_linearity is either a callable or a value: ['tanh', 'sigmoid', 'relu', 'quantTanh', 'quantSigm', 'quantSigm4']")
         return non_linearity(A)
 
+# -------------------------------
+# Comfi-FastGRNN cell
+# -------------------------------
 class ComfiFastGRNNCell(AbstractRNNCell):
 
     '''
     Comfi-FastGRNN Cell
 
     This class is upgraded from the official FastGRNN cell code to Tensorflow 2.0 syntax, and
-    it is extended with the trainable complementary filter aproach suggested our paper.
+    it is extended with the trainable complementary filter aproach suggested in our paper.
 
     Original FastGRNN cell code available in: https://github.com/microsoft/EdgeML/tree/master    
     
@@ -275,3 +279,46 @@ class ComfiFastGRNNCell(AbstractRNNCell):
     @classmethod
     def from_config(cls, config):
         return cls(**config)
+
+# -------------------------------
+# Comfi-FastGRNN layer
+# -------------------------------
+class ComfiFastGRNN(RNN):
+    def __init__(
+        self,
+        cell=None,
+        hidden_size=None,
+        return_sequences=False,
+        return_state=False,
+        go_backwards=False,
+        stateful=False,
+        unroll=False,
+        **kwargs
+    ):
+
+        if cell is None:
+            if hidden_size is None:
+                raise ValueError("Either `cell` or `hidden_size` must be provided.")
+            cell = ComfiFastGRNNCell(hidden_size=hidden_size)
+
+        # Save for config
+        self.hidden_size = getattr(cell, "hidden_size", hidden_size)
+
+        super().__init__(
+            cell,
+            return_sequences=return_sequences,
+            return_state=return_state,
+            go_backwards=go_backwards,
+            stateful=stateful,
+            unroll=unroll,
+            **kwargs
+        )
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "hidden_size": self.hidden_size,
+        })
+        return config
+
+
