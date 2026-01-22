@@ -4,22 +4,9 @@ import torch.nn.functional as F
 import math
 import libsegmenter
 from ComfiFastGRNNTorch import ComfiFastGRNNTorch
-
-class ComplexRatioMask(nn.Module):
-    """
-    PyTorch implementation of Complex Ratio Masking.
-    S = (Mr * Yr - Mi * Yi) + j(Mr * Yi + Mi * Yr)
-    """
-    def __init__(self, masking_mode='masking'):
-        super().__init__()
-        self.masking_mode = masking_mode
-
-    def forward(self, real, imag, mask_real, mask_imag):
-        # real/imag: [B, T, F]
-        # mask_real/mask_imag: [B, T, F]
-        est_real = real * mask_real - imag * mask_imag
-        est_imag = real * mask_imag + imag * mask_real
-        return torch.complex(est_real, est_imag)
+from CRM_pytorch import ComplexRatioMask
+import yaml
+from torchinfo import summary
 
 class STFTLayer(nn.Module):
     """
@@ -157,6 +144,7 @@ class FastULCNetTorch(nn.Module):
         window = torch.from_numpy(libsegmenter.WindowSelector("hann75", "wola", self.block_len).analysis_window) if dp["hann_window"] else None
         self.stft_layer = STFTLayer(self.block_len, self.block_shift, window)
         self.reorientation = ChannelWiseFeatureReorientation(input_freq_dim=freq_dim)
+        self.crm_layer = ComplexRatioMask(masking_mode=mp['CRM_type'])
         
         # Conv Block
         self.conv_block = ConvBlock(in_channels=8)
@@ -264,8 +252,21 @@ class FastULCNetTorch(nn.Module):
         
         # 9. Reshape mask, CRM and decompression
         m_real, m_imag = c_mask[:, 0, :, :], c_mask[:, 1, :, :]
-        est_speech_comp = self.crm_layer(real, imag, m_real, m_imag)  
+        est_speech_comp = self.crm_layer(real, imag, m_real, m_imag)
         # Decompress
         estimated_speech = self.power_law_decompression(est_speech_comp)
         
         return estimated_speech
+    
+if __name__ == '__main__':
+    # Load config
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f, yaml.FullLoader)
+    
+    model = FastULCNetTorch(config)
+
+    summary(
+        model,
+        input_size=(1, 16000),
+        device="cpu"
+    )
