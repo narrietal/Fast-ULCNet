@@ -6,7 +6,7 @@ The paper is available [here](https://arxiv.org/abs/2601.14925).
 
 A demo with online examples is available [here](https://narrietal.github.io/Fast-ULCNet/).
 
-This repository contains the code to build the model as described in the paper.  
+This repository contains the code to build the Comfi-FastGRNN and Fast-ULCNet model in Tensorflow 2+ and Pytorch.  
 A `requirements.txt` file is provided for setting up the environment.  
 
 ---
