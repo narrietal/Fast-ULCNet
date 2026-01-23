@@ -48,7 +48,7 @@ batch_size = 2
 # Create input for TF
 x_tf = tf.random.normal((batch_size, seq_len, input_size))
 # Build TF RNN
-tf_rnn = Bidirectional(ComfiFastGRNN(hidden_size=hidden_size, return_sequences=True))
+tf_rnn = Bidirectional(ComfiFastGRNN(units=hidden_size, return_sequences=True))
 # Run inference
 tf_rnn_output = tf_rnn(x_tf)
 

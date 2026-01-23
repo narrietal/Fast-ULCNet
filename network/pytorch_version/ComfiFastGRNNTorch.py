@@ -146,15 +146,25 @@ class ComfiFastGRNNCellTorch(nn.Module):
 class ComfiFastGRNNTorch(nn.Module):
     def __init__(
         self,
-        input_size,
-        hidden_size,
-        num_layers=1,
-        batch_first=True,
-        dropout=0.0,
-        bidirectional=False,
-        **cell_kwargs,
+        input_size: int,
+        hidden_size: int,
+        num_layers: int = 1,
+        batch_first: bool = True,
+        dropout: float = 0.0,
+        bidirectional: bool = False,
+        # ---- Cell arguments (explicitly exposed) ----
+        gate_non_linearity: str = "sigmoid",
+        update_non_linearity: str = "tanh",
+        w_rank: int | None = None,
+        u_rank: int | None = None,
+        zeta_init: float = 1.0,
+        nu_init: float = -4.0,
+        lambda_init: float = 0.0,
+        gamma_init: float = 0.999,
     ):
         super().__init__()
+
+        # ---- Layer config ----
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -163,60 +173,102 @@ class ComfiFastGRNNTorch(nn.Module):
         self.bidirectional = bidirectional
         self.num_directions = 2 if bidirectional else 1
 
-        # Define cells for each layer and direction
+        # ---- Cell config (stored for export / repr / checkpoint clarity) ----
+        self.gate_non_linearity = gate_non_linearity
+        self.update_non_linearity = update_non_linearity
+        self.w_rank = w_rank
+        self.u_rank = u_rank
+        self.zeta_init = zeta_init
+        self.nu_init = nu_init
+        self.lambda_init = lambda_init
+        self.gamma_init = gamma_init
+
+        # ---- Cells ----
         self.cells_fwd = nn.ModuleList()
         self.cells_bwd = nn.ModuleList() if bidirectional else None
 
         for layer in range(num_layers):
             in_size = input_size if layer == 0 else hidden_size * self.num_directions
-            self.cells_fwd.append(ComfiFastGRNNCellTorch(in_size, hidden_size, **cell_kwargs))
+
+            self.cells_fwd.append(
+                ComfiFastGRNNCellTorch(
+                    input_size=in_size,
+                    hidden_size=hidden_size,
+                    gate_non_linearity=gate_non_linearity,
+                    update_non_linearity=update_non_linearity,
+                    w_rank=w_rank,
+                    u_rank=u_rank,
+                    zeta_init=zeta_init,
+                    nu_init=nu_init,
+                    lambda_init=lambda_init,
+                    gamma_init=gamma_init,
+                )
+            )
+
             if bidirectional:
-                self.cells_bwd.append(ComfiFastGRNNCellTorch(in_size, hidden_size, **cell_kwargs))
+                self.cells_bwd.append(
+                    ComfiFastGRNNCellTorch(
+                        input_size=in_size,
+                        hidden_size=hidden_size,
+                        gate_non_linearity=gate_non_linearity,
+                        update_non_linearity=update_non_linearity,
+                        w_rank=w_rank,
+                        u_rank=u_rank,
+                        zeta_init=zeta_init,
+                        nu_init=nu_init,
+                        lambda_init=lambda_init,
+                        gamma_init=gamma_init,
+                    )
+                )
 
     def forward(self, x, h0=None):
         """
         x:  (batch, seq_len, input_size) if batch_first=True
         h0: (num_layers * num_directions, batch, hidden_size)
+
         Returns:
           output: (batch, seq_len, hidden_size * num_directions)
           h_n:    (num_layers * num_directions, batch, hidden_size)
         """
         if not self.batch_first:
-            x = x.transpose(0, 1)  # to (batch, seq_len, input_size)
+            x = x.transpose(0, 1)
 
         batch_size, seq_len, _ = x.size()
 
         if h0 is None:
-            h0 = x.new_zeros(self.num_layers * self.num_directions, batch_size, self.hidden_size)
+            h0 = x.new_zeros(
+                self.num_layers * self.num_directions,
+                batch_size,
+                self.hidden_size,
+            )
 
         layer_input = x
         h_n = []
 
-        # Process each layer
         for layer in range(self.num_layers):
             fw_cell = self.cells_fwd[layer]
             h_fw = h0[layer * self.num_directions + 0]
             fw_outs = []
 
-            # ---- forward direction ----
+            # ---- forward ----
             for t in range(seq_len):
-                x_t = layer_input[:, t, :]
-                h_fw = fw_cell(x_t, h_fw)
+                h_fw = fw_cell(layer_input[:, t, :], h_fw)
                 fw_outs.append(h_fw.unsqueeze(1))
-            fw_out = torch.cat(fw_outs, dim=1)  # (batch, seq_len, hidden)
+
+            fw_out = torch.cat(fw_outs, dim=1)
 
             if self.bidirectional:
                 bw_cell = self.cells_bwd[layer]
                 h_bw = h0[layer * self.num_directions + 1]
                 bw_outs = []
 
-                # ---- backward direction ----
+                # ---- backward ----
                 for t in reversed(range(seq_len)):
-                    x_t = layer_input[:, t, :]
-                    h_bw = bw_cell(x_t, h_bw)
+                    h_bw = bw_cell(layer_input[:, t, :], h_bw)
                     bw_outs.append(h_bw.unsqueeze(1))
-                bw_outs.reverse()  # reverse time dimension
-                bw_out = torch.cat(bw_outs, dim=1)  # (batch, seq_len, hidden)
+
+                bw_outs.reverse()
+                bw_out = torch.cat(bw_outs, dim=1)
 
                 layer_out = torch.cat([fw_out, bw_out], dim=2)
                 h_n.extend([h_fw, h_bw])
@@ -224,16 +276,15 @@ class ComfiFastGRNNTorch(nn.Module):
                 layer_out = fw_out
                 h_n.append(h_fw)
 
-            # Dropout (except last layer)
             if self.dropout > 0.0 and layer < self.num_layers - 1:
                 layer_out = F.dropout(layer_out, p=self.dropout, training=self.training)
 
             layer_input = layer_out
 
         output = layer_input
-        h_n = torch.stack(h_n, dim=0)  # (num_layers * num_directions, batch, hidden)
+        h_n = torch.stack(h_n, dim=0)
 
         if not self.batch_first:
-            output = output.transpose(0, 1)  # back to (seq_len, batch, hidden)
+            output = output.transpose(0, 1)
 
         return output, h_n
