@@ -3,6 +3,7 @@ from tensorflow.keras.layers import AbstractRNNCell
 from tensorflow.keras import backend
 from tensorflow.keras.initializers import RandomNormal, Constant, Ones
 from tensorflow.keras.constraints import MinMaxNorm
+from tensorflow.keras.layers import RNN
 
 
 def gen_non_linearity(A, non_linearity):
@@ -32,13 +33,16 @@ def gen_non_linearity(A, non_linearity):
             raise ValueError("non_linearity is either a callable or a value: ['tanh', 'sigmoid', 'relu', 'quantTanh', 'quantSigm', 'quantSigm4']")
         return non_linearity(A)
 
+# -------------------------------
+# Comfi-FastGRNN cell
+# -------------------------------
 class ComfiFastGRNNCell(AbstractRNNCell):
 
     '''
     Comfi-FastGRNN Cell
 
     This class is upgraded from the official FastGRNN cell code to Tensorflow 2.0 syntax, and
-    it is extended with the trainable complementary filter aproach suggested our paper.
+    it is extended with the trainable complementary filter aproach suggested in our paper.
 
     Original FastGRNN cell code available in: https://github.com/microsoft/EdgeML/tree/master    
     
@@ -271,6 +275,85 @@ class ComfiFastGRNNCell(AbstractRNNCell):
 
         base_config = super(ComfiFastGRNNCell, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+# -------------------------------
+# Comfi-FastGRNN layer
+# -------------------------------
+class ComfiFastGRNN(tf.keras.layers.RNN):
+
+    def __init__(
+        self,
+        units,
+        gate_non_linearity="sigmoid",
+        update_non_linearity="tanh",
+        w_rank=None,
+        u_rank=None,
+        zeta_init=1.0,
+        nu_init=-4.0,
+        lambda_init=0.0,
+        gamma_init=0.999,
+        return_sequences=False,
+        return_state=False,
+        go_backwards=False,
+        stateful=False,
+        unroll=False,
+        **kwargs,
+    ):
+
+        self.hidden_size = units
+        self.gate_non_linearity = gate_non_linearity
+        self.update_non_linearity = update_non_linearity
+        self.w_rank = w_rank
+        self.u_rank = u_rank
+        self.zeta_init = zeta_init
+        self.nu_init = nu_init
+        self.lambda_init = lambda_init
+        self.gamma_init = gamma_init
+
+        cell = ComfiFastGRNNCell(
+            hidden_size=units,
+            gate_non_linearity=gate_non_linearity,
+            update_non_linearity=update_non_linearity,
+            w_rank=w_rank,
+            u_rank=u_rank,
+            zeta_init=zeta_init,
+            nu_init=nu_init,
+            lambda_init=lambda_init,
+            gamma_init=gamma_init,
+        )
+
+        super().__init__(
+            cell=cell,
+            return_sequences=return_sequences,
+            return_state=return_state,
+            go_backwards=go_backwards,
+            stateful=stateful,
+            unroll=unroll,
+            **kwargs,
+        )
+
+    def get_config(self):
+        config = super().get_config()
+
+        # Remove serialized cell
+        config.pop("cell", None)
+
+        config.update({
+            "units": self.hidden_size,
+            "gate_non_linearity": self.gate_non_linearity,
+            "update_non_linearity": self.update_non_linearity,
+            "w_rank": self.w_rank,
+            "u_rank": self.u_rank,
+            "zeta_init": self.zeta_init,
+            "nu_init": self.nu_init,
+            "lambda_init": self.lambda_init,
+            "gamma_init": self.gamma_init,
+        })
+        return config
 
     @classmethod
     def from_config(cls, config):
