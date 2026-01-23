@@ -35,9 +35,9 @@ A simple unit test code is provided to compare the Comfi-FastGRNN implementation
 python unit_tests/unit_test_tensorflow_torch.py
 ```
 
-## Work in progress
-- Fast-ULCNet Pytorch implementation
-- Python package of Comfi-FastGRNN for both Tensorflow and Pytorch
+## To do list
+- [x] Fast-ULCNet Pytorch implementation
+- [ ] Python package of Comfi-FastGRNN for both Tensorflow and Pytorch
 
 ## Citation
 If you use Fast-ULCNet to inspire your research, please cite the paper: (TBD)
