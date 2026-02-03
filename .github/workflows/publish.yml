@@ -11,7 +11,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: ./network/pytorch_version
+        working-directory: ./packages/torch_version
 
     steps:
       - name: Checkout repository
@@ -43,7 +43,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: ./network/tensorflow_version
+        working-directory: ./packages/tensorflow_version
 
     steps:
       - name: Checkout repository

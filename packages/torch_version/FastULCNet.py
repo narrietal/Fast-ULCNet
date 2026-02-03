@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 import libsegmenter
-from .ComfiFastGRNNTorch import ComfiFastGRNNTorch
+from comfi_fast_grnn_torch.ComfiFastGRNN import ComfiFastGRNN
 from CRM_pytorch import ComplexRatioMask
 import yaml
 from torchinfo import summary
@@ -122,7 +122,7 @@ class ConvBlock(nn.Module):
 
         return x
 
-class FastULCNetTorch(nn.Module):
+class FastULCNet(nn.Module):
     """
     Fast-ULCNet network class.
     """
@@ -150,7 +150,7 @@ class FastULCNetTorch(nn.Module):
         self.conv_block = ConvBlock(in_channels=8)
         
         # RNN units        
-        self.freq_rnn  = ComfiFastGRNNTorch(
+        self.freq_rnn  = ComfiFastGRNN(
                             input_size=128,
                             hidden_size=self.bidirectional_frnn_units,
                             bidirectional=True,
@@ -159,14 +159,14 @@ class FastULCNetTorch(nn.Module):
         # Point-wise conv
         self.pointwise_conv = nn.Conv2d(2 * self.bidirectional_frnn_units, 64, kernel_size=(1,1), bias=False)
           
-        self.sub_band_rnn1  = ComfiFastGRNNTorch(
+        self.sub_band_rnn1  = ComfiFastGRNN(
                     input_size=192,
                     hidden_size=self.sub_band_rnn_units,
                     num_layers=2,
                     batch_first=True
                 )
         
-        self.sub_band_rnn2  = ComfiFastGRNNTorch(
+        self.sub_band_rnn2  = ComfiFastGRNN(
                     input_size=192,
                     hidden_size=self.sub_band_rnn_units,
                     num_layers=2,
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     with open('config.yml', 'r') as f:
         config = yaml.load(f, yaml.FullLoader)
     
-    model = FastULCNetTorch(config)
+    model = FastULCNet(config)
 
     summary(
         model,
