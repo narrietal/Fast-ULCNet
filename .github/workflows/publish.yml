@@ -43,7 +43,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: ./network/pytorch_version
+        working-directory: ./network/tensorflow_version
 
     steps:
       - name: Checkout repository
