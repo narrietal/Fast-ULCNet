@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comfi_fast_grnn_tensorflow"  
+version = "0.0.1"
+description = "A Tensorflow implementation of Comfi-FastGRNN"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.10"
+license = {text = "MIT"} 
+authors = [
+    {name = "Nicolas Arrieta Larraza", email = "NIAL@bang-olufsen.dk"},
+    {name = "Niels de Koeijer", email = "NEMK@bang-olufsen.dk"}
+]
+dependencies = [
+    "tensorflow>=2.14.0",
+    "tensorflow-estimator>=2.14.0",
+    "libsegmenter==1.0.4",
+    "CRM_tensorflow==0.1.6",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/narrietal/Fast-ULCNet"

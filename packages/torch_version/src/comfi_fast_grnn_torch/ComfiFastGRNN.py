@@ -33,7 +33,7 @@ def gen_non_linearity(A, non_linearity):
 # -------------------------------
 # Comfi-FastGRNN cell
 # -------------------------------
-class ComfiFastGRNNCellTorch(nn.Module):
+class ComfiFastGRNNCell(nn.Module):
     '''
     Comfi-FastGRNN Cell
 
@@ -143,7 +143,7 @@ class ComfiFastGRNNCellTorch(nn.Module):
 # -------------------------------
 # Comfi-FastGRNN layer
 # -------------------------------
-class ComfiFastGRNNTorch(nn.Module):
+class ComfiFastGRNN(nn.Module):
     def __init__(
         self,
         input_size: int,
@@ -191,7 +191,7 @@ class ComfiFastGRNNTorch(nn.Module):
             in_size = input_size if layer == 0 else hidden_size * self.num_directions
 
             self.cells_fwd.append(
-                ComfiFastGRNNCellTorch(
+                ComfiFastGRNNCell(
                     input_size=in_size,
                     hidden_size=hidden_size,
                     gate_non_linearity=gate_non_linearity,
@@ -207,7 +207,7 @@ class ComfiFastGRNNTorch(nn.Module):
 
             if bidirectional:
                 self.cells_bwd.append(
-                    ComfiFastGRNNCellTorch(
+                    ComfiFastGRNNCell(
                         input_size=in_size,
                         hidden_size=hidden_size,
                         gate_non_linearity=gate_non_linearity,

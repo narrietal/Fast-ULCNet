@@ -5,7 +5,7 @@ from tensorflow.keras.layers import Dense, Lambda, Input, Activation, RNN, Bidir
 import math
 import libsegmenter
 from CRM_tensorflow import ComplexRatioMask
-from ComfiFastGRNN import ComfiFastGRNN
+from comfi_fast_grnn_tensorflow.ComfiFastGRNN import ComfiFastGRNN
 import yaml
 
 class STFTLayer(Layer):

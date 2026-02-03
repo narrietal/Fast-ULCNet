@@ -11,12 +11,19 @@ A `requirements.txt` file is provided for setting up the environment.
 
 ---
 
-## Installation
+## Manual Installation
 
 Clone the repository and install the dependencies:
 
 ```bash
 pip install -r requirements.txt
+```
+
+## Pip Installation
+To install FastULCNet and Comfi-FastGRNN you can run:
+```bash
+pip install fast-ulcnet-torch
+pip install fast-ulcnet-tensorflow
 ```
 
 ## Build model
@@ -35,11 +42,5 @@ A simple unit test code is provided to compare the Comfi-FastGRNN implementation
 python unit_tests/unit_test_tensorflow_torch.py
 ```
 
-## To do list
-- [x] Fast-ULCNet Pytorch implementation
-- [ ] Python package of Comfi-FastGRNN for both Tensorflow and Pytorch
-
 ## Citation
 If you use Fast-ULCNet to inspire your research, please cite the paper: (TBD)
-
-
