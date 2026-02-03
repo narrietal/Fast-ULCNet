@@ -14,9 +14,9 @@ authors = [
     {name = "Niels de Koeijer", email = "NEMK@bang-olufsen.dk"}
 ]
 dependencies = [
-    "tensorflow>=2.14.0"
-    "tensorflow-estimator>=2.14.0"
-    "tensorflow-io-gcs-filesystem>=0.37.1"
+    "tensorflow>=2.14.0",
+    "tensorflow-estimator>=2.14.0",
+    "tensorflow-io-gcs-filesystem>=0.37.1",
     "libsegmenter==1.0.4",
     "CRM_tensorflow==0.1.6",
 ]
