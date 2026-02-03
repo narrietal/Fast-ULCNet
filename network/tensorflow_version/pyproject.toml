@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fast_ulcnet_tensorflow"  
+version = "0.0.1"
+description = "A PyTorch implementation of Fast ULCNet"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"} 
+authors = [
+    {name = "Nicolas Arrieta Larraza", email = "NIAL@bang-olufsen.dk"},
+    {name = "Niels de Koeijer", email = "NEMK@bang-olufsen.dk"}
+]
+dependencies = [
+    "tensorflow>=2.14.0"
+    "tensorflow-estimator>=2.14.0"
+    "tensorflow-io-gcs-filesystem>=0.37.1"
+    "libsegmenter==1.0.4",
+    "CRM_tensorflow==0.1.6",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/narrietal/Fast-ULCNet"
