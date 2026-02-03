@@ -235,7 +235,7 @@ class FastULCNet():
     
 if __name__ == '__main__':
     # Load config
-    with open('config.yml', 'r') as f:
+    with open('fast_ulcnet_networks/config.yml', 'r') as f:
         config = yaml.load(f, yaml.FullLoader)
     
     model_runner = FastULCNet(config)

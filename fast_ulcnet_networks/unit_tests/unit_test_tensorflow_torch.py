@@ -5,8 +5,8 @@ from tensorflow.keras.layers import RNN, Bidirectional
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-from tensorflow_version.ComfiFastGRNN import ComfiFastGRNN
-from pytorch_version.ComfiFastGRNNTorch import ComfiFastGRNNTorch
+from comfi_fast_grnn_tensorflow import ComfiFastGRNN as ComfiFastGRNNTF
+from comfi_fast_grnn_torch import ComfiFastGRNN  as ComfiFastGRNNTorch
 torch.manual_seed(42)
 
 # -------------------------------
@@ -48,7 +48,7 @@ batch_size = 2
 # Create input for TF
 x_tf = tf.random.normal((batch_size, seq_len, input_size))
 # Build TF RNN
-tf_rnn = Bidirectional(ComfiFastGRNN(units=hidden_size, return_sequences=True))
+tf_rnn = Bidirectional(ComfiFastGRNNTF(units=hidden_size, return_sequences=True))
 # Run inference
 tf_rnn_output = tf_rnn(x_tf)
 
