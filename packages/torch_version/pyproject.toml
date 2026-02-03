@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "comfi_fast_grnn_torch"  
 version = "0.0.1"
 description = "A PyTorch implementation of Fast ULCNet"
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.10"
 license = {text = "MIT"} 
 authors = [
