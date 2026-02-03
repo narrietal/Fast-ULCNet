@@ -13,22 +13,19 @@ The Comfi-FastGRNN layer is available as a pip package, making it easy to integr
 ---
 
 ## Installation
+Clone the repository, create an environment and install the dependencies.
 
-### Manual installation 
-Clone the repository and install the dependencies and play around with the source code:
-
+### Install requirements
 ```bash
 pip install -r requirements.txt
 ```
 
-### Pip installation
-
-#### Tensorflow
+### Install Comfi-FastGRNN Tensorflow layer
 ```bash
 pip install comfi-fast-grnn-tensorflow 
 ```
 
-#### Pytorch
+### Install Comfi-FastGRNN Pytorch layer
 ```bash
 pip install comfi-fast-grnn-torch
 ```
@@ -46,7 +43,7 @@ python fast_ulcnet_networks/pytorch_version/FastULCNetTorch.py
 ### Unit test
 A simple unit test code is provided to compare the Comfi-FastGRNN implementations between Tensorflow and Pytorch.
 ```bash
-python unit_tests/unit_test_tensorflow_torch.py
+python fast_ulcnet_networks/unit_tests/unit_test_tensorflow_torch.py
 ```
 
 ## To do list
