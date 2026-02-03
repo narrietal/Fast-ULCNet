@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fast_ulcnet_torch"  
+version = "0.0.1"
+description = "A PyTorch implementation of Fast ULCNet"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"} 
+authors = [
+    {name = "Nicolas Arrieta Larraza", email = "NIAL@bang-olufsen.dk"},
+    {name = "Niels de Koeijer", email = "NEMK@bang-olufsen.dk"}
+]
+dependencies = [
+    "torch>=2.5.1",
+    "libsegmenter==1.0.4",
+    "torchinfo==1.8.0",
+    "CRM_pytorch==0.1.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/narrietal/Fast-ULCNet"
