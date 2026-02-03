@@ -1,5 +1,5 @@
 # fast-ulcnet-torch
-Implements FastULCNet and Comfi-FastGRNN in torch.
+Implements Comfi-FastGRNN in torch.
 
 ## Usage
 
