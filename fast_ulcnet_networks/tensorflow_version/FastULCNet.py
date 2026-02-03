@@ -148,7 +148,7 @@ class FastULCNet():
         Frequency-axis bidirectional Comfi-FastGRNN layer 
         '''
         reshaped_x = tf.reshape(x, shape=(tf.shape(x)[0]*tf.shape(x)[1], tf.shape(x)[2], tf.shape(x)[3]))
-        output_frnn = Bidirectional(ComfiFastGRNN(hidden_size=self.bidirectional_frnn_units, return_sequences=True))(reshaped_x)
+        output_frnn = Bidirectional(ComfiFastGRNN(units=self.bidirectional_frnn_units, return_sequences=True))(reshaped_x)
         reshaped_output_frnn = tf.reshape(output_frnn, (tf.shape(x)[0], tf.shape(x)[1], tf.shape(x)[2], 2*self.bidirectional_frnn_units), name="reshape_output_frnn")
         return reshaped_output_frnn
     
@@ -156,8 +156,8 @@ class FastULCNet():
         '''
         Subband temporal Comfi-FastGRNN layer.
         '''
-        out_rnn_1 = ComfiFastGRNN(hidden_size=self.sub_band_rnn_units, return_sequences=True)(x)
-        out_rnn_2 = ComfiFastGRNN(hidden_size=self.sub_band_rnn_units, return_sequences=True)(out_rnn_1)
+        out_rnn_1 = ComfiFastGRNN(units=self.sub_band_rnn_units, return_sequences=True)(x)
+        out_rnn_2 = ComfiFastGRNN(units=self.sub_band_rnn_units, return_sequences=True)(out_rnn_1)
         return out_rnn_2
     
     def cnn_block(self, x):
