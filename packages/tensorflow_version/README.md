@@ -10,7 +10,7 @@ The simplest way to use the layer with default settings:
 
 ```python
 import tensorflow as tf
-from comfi_fastgrnn import ComfiFastGRNN  # Assuming code is saved in this module
+from comfi_fast_grnn_tensorflow import ComfiFastGRNN  
 
 # Define a Sequential model
 model = tf.keras.Sequential([
