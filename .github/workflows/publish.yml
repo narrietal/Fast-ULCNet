@@ -36,7 +36,7 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          python -m twine upload dist/* --skip-existing
+          python -m twine upload dist/* 
 
   build-and-publish-tensorflow:
     runs-on: ubuntu-latest
@@ -68,4 +68,4 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          python -m twine upload dist/* --skip-existing
+          python -m twine upload dist/* 
