@@ -1,3 +1,11 @@
+name: Publish Python Package
+
+
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   build-and-publish-torch:
     runs-on: ubuntu-latest
