@@ -21,11 +21,13 @@ pip install -r requirements.txt
 ```
 
 ### Install Comfi-FastGRNN Tensorflow layer
+From pypi:
 ```bash
 pip install comfi-fast-grnn-tensorflow 
 ```
 
 ### Install Comfi-FastGRNN Pytorch layer
+From pypi:
 ```bash
 pip install comfi-fast-grnn-torch
 ```
