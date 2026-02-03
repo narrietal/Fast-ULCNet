@@ -1,11 +1,9 @@
 name: Publish Python Package
 
-# on:
-#   workflow_dispatch:
 on:
   push:
     branches:
-      - pypi
+      - main
 
 jobs:
   build-and-publish-torch:
