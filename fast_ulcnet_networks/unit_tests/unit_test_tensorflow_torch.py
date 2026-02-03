@@ -5,8 +5,8 @@ from tensorflow.keras.layers import RNN, Bidirectional
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-from network.tensorflow_version.ComfiFastGRNN import ComfiFastGRNN
-from network.pytorch_version.ComfiFastGRNNTorch import ComfiFastGRNNTorch
+from tensorflow_version.ComfiFastGRNN import ComfiFastGRNN
+from pytorch_version.ComfiFastGRNNTorch import ComfiFastGRNNTorch
 torch.manual_seed(42)
 
 # -------------------------------

@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 import libsegmenter
-from comfi_fast_grnn_torch.ComfiFastGRNN import ComfiFastGRNN
+from comfi_fast_grnn_torch import ComfiFastGRNN 
 from CRM_pytorch import ComplexRatioMask
 import yaml
 from torchinfo import summary

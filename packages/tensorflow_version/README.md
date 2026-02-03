@@ -1,4 +1,4 @@
-# fast-ulcnet-tensorflow
+# comfi-fast-grnn-tensorflow
 Implements Comfi-FastGRNN in tensorflow.
 
 ## Usage
@@ -11,20 +11,10 @@ The simplest way to use the layer with default settings:
 ```python
 import tensorflow as tf
 from comfi_fast_grnn_tensorflow import ComfiFastGRNN  
-
-# Define a Sequential model
-model = tf.keras.Sequential([
-    # Input shape: (Timesteps, Features)
-    tf.keras.layers.Input(shape=(100, 32)), 
     
-    # Comfi-FastGRNN layer
-    ComfiFastGRNN(
-        units=64, 
-        return_sequences=False
-    ),
-    
-    tf.keras.layers.Dense(10, activation='softmax')
-])
-
-model.summary()
+# Comfi-FastGRNN layer
+comfi_fgrnn = ComfiFastGRNN(
+    units=64, 
+    return_sequences=False
+)
 ```

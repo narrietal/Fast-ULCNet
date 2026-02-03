@@ -1,4 +1,4 @@
-# fast-ulcnet-torch
+# comfi-fast-grnn-torch
 Implements Comfi-FastGRNN in torch.
 
 ## Usage
@@ -12,21 +12,9 @@ Here is how to use the layer with default settings in a standard training loop:
 import torch
 from comfi_fast_grnn_torch import ComfiFastGRNN 
 
-# 1. Initialize the layer
-# batch_first=True is the default for this implementation
-model = ComfiFastGRNN(
+comfi_fgrnn = ComfiFastGRNN(
     input_size=32, 
     hidden_size=64, 
     num_layers=1
 )
-
-# 2. Create dummy input: (Batch Size, Sequence Length, Input Size)
-x = torch.randn(10, 50, 32)
-
-# 3. Forward pass
-# Returns output (all timesteps) and final hidden state
-output, h_n = model(x)
-
-print(f"Output shape: {output.shape}")  # torch.Size([10, 50, 64])
-print(f"Hidden state shape: {h_n.shape}") # torch.Size([1, 10, 64])
 ```
